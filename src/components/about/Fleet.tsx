@@ -1,6 +1,6 @@
 import type { AboutMe } from "@/payload/payload-types";
 
-const specRows: { key: keyof AboutMe["rigs"][number]; label: string }[] = [
+const specRows: { key: keyof NonNullable<AboutMe["rigs"]>[number]; label: string }[] = [
   { key: "prop", label: "PROP" },
   { key: "speed", label: "MAX SPEED" },
   { key: "weight", label: "WEIGHT" },
@@ -24,7 +24,7 @@ export function Fleet({ data }: FleetProps) {
         {data.intro}
       </p>
       <div className="grid grid-cols-1 gap-5.5 md:grid-cols-3">
-        {data.rigs.map((rig, i) => (
+        {(data.rigs ?? []).map((rig, i) => (
           <div
             key={rig.id ?? rig.name}
             className="border border-white/12 bg-[#0e0f11] p-7 transition duration-300 ease-out hover:-translate-y-1.5 hover:border-white/40"
