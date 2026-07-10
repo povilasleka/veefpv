@@ -1,6 +1,6 @@
 import configPromise from "@payload-config";
 import { getPayload } from "payload";
-import type { AboutMe, Category, Project, Reel, WorkedWith } from "@/payload/payload-types";
+import type { AboutMe, Category, Hero, Project, Reel, WorkedWith } from "@/payload/payload-types";
 
 export async function getCategories(): Promise<Category[]> {
   const payload = await getPayload({ config: configPromise });
@@ -41,6 +41,11 @@ export async function getAboutMe(): Promise<AboutMe> {
 export async function getWorkedWith(): Promise<WorkedWith> {
   const payload = await getPayload({ config: configPromise });
   return payload.findGlobal({ slug: "worked-with" });
+}
+
+export async function getHero(): Promise<Hero> {
+  const payload = await getPayload({ config: configPromise });
+  return payload.findGlobal({ slug: "hero" });
 }
 
 export async function getReels(): Promise<Reel[]> {

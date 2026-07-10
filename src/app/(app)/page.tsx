@@ -6,14 +6,15 @@ import { BrandsMarquee } from "@/components/home/BrandsMarquee";
 import { InstagramReels } from "@/components/home/InstagramReels";
 import { BigCta } from "@/components/home/BigCta";
 import { Reveal } from "@/components/ui/Reveal";
-import { getWorkedWith, getReels } from "@/lib/payload";
+import { getWorkedWith, getReels, getHero } from "@/lib/payload";
 
 export default async function HomePage() {
-  const [workedWith, reels] = await Promise.all([getWorkedWith(), getReels()]);
+  const [workedWith, reels, hero] = await Promise.all([getWorkedWith(), getReels(), getHero()]);
+  const videoUrl = typeof hero.video === "object" ? hero.video.url : null;
 
   return (
     <div>
-      <Hero />
+      {videoUrl && <Hero videoUrl={videoUrl} />}
       <TickerStrip />
       <Reveal>
         <WhatIShoot />

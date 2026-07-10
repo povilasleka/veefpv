@@ -98,10 +98,12 @@ export interface Config {
   globals: {
     'about-me': AboutMe;
     'worked-with': WorkedWith;
+    hero: Hero;
   };
   globalsSelect: {
     'about-me': AboutMeSelect<false> | AboutMeSelect<true>;
     'worked-with': WorkedWithSelect<false> | WorkedWithSelect<true>;
+    hero: HeroSelect<false> | HeroSelect<true>;
   };
   locale: null;
   widgets: {
@@ -572,6 +574,19 @@ export interface WorkedWith {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hero".
+ */
+export interface Hero {
+  id: number;
+  /**
+   * Looping background video for the homepage hero section.
+   */
+  video: number | Media;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "about-me_select".
  */
 export interface AboutMeSelect<T extends boolean = true> {
@@ -621,6 +636,16 @@ export interface WorkedWithSelect<T extends boolean = true> {
         name?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hero_select".
+ */
+export interface HeroSelect<T extends boolean = true> {
+  video?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

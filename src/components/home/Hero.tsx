@@ -1,8 +1,10 @@
 import { GlitchHeading } from "@/components/ui/GlitchHeading";
 
-const HERO_VIDEO_SRC = "/assets/header-video.mp4";
+interface HeroProps {
+  videoUrl: string;
+}
 
-export function Hero() {
+export function Hero({ videoUrl }: HeroProps) {
   return (
     <div className="relative h-screen min-h-[680px] overflow-hidden bg-ink">
       <video
@@ -10,7 +12,7 @@ export function Hero() {
         muted
         loop
         playsInline
-        src={HERO_VIDEO_SRC}
+        src={videoUrl}
         className="absolute inset-0 h-full w-full object-cover"
         style={{ animation: "fadeIn 1.6s ease both" }}
       />

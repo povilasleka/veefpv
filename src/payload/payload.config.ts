@@ -14,6 +14,7 @@ import { ContactSubmissions } from "./collections/ContactSubmissions";
 import { Reels } from "./collections/Reels";
 import { AboutMe } from "./globals/AboutMe";
 import { WorkedWith } from "./globals/WorkedWith";
+import { Hero } from "./globals/Hero";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -26,7 +27,7 @@ export default buildConfig({
     },
   },
   collections: [Users, Media, Projects, Categories, ContactSubmissions, Reels],
-  globals: [AboutMe, WorkedWith],
+  globals: [AboutMe, WorkedWith, Hero],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "",
   typescript: {
