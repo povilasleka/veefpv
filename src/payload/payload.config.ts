@@ -46,9 +46,7 @@ export default buildConfig({
     s3Storage({
       enabled: Boolean(process.env.R2_BUCKET),
       collections: {
-        media: {
-          prefix: "media",
-        },
+        media: true,
       },
       bucket: process.env.R2_BUCKET || "",
       config: {
