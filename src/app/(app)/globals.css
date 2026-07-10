@@ -1,0 +1,232 @@
+@import "tailwindcss";
+
+@theme {
+  /* Single responsive breakpoint for the whole site (desktop nav switches here) */
+  --breakpoint-md: 860px;
+
+  --color-ink: #08090a;
+  --color-accent: oklch(0.8 0.21 130);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-ink);
+  color: rgb(255 255 255 / 0.92);
+  font-family: var(--font-space-grotesk), sans-serif;
+}
+
+::selection {
+  background: oklch(0.8 0.21 130 / 0.4);
+}
+
+/* Diagonal-stripe media placeholder, used wherever real footage/photos are missing */
+.stripe-placeholder {
+  background-image: repeating-linear-gradient(120deg, #17181b 0 18px, #101114 18px 36px);
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Display heading: Archivo, expanded width, heavy weight */
+.text-display {
+  font-family: var(--font-archivo), sans-serif;
+  font-stretch: 125%;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+/* Small tracked mono label used for OSD/telemetry-style copy */
+.text-mono-label {
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.nav-underline {
+  position: relative;
+}
+.nav-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: -6px;
+  height: 1.5px;
+  background: currentColor;
+  transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nav-underline:hover::after {
+  right: 0;
+}
+
+/* Glitch headline: red/cyan slice-shifted duplicates of the text, driven by data-text */
+.glitch {
+  position: relative;
+}
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  color: inherit;
+  -webkit-text-stroke: inherit;
+}
+.glitch::before {
+  color: #ff2d55;
+  animation:
+    glitchShift 5s steps(1) infinite,
+    glitchSlice 5s steps(1) infinite;
+  z-index: -1;
+}
+.glitch::after {
+  color: #00e5ff;
+  animation:
+    glitchShift2 5s steps(1) infinite,
+    glitchSlice 5s steps(1) infinite 0.04s;
+  z-index: -1;
+}
+.glitch-delay::before,
+.glitch-delay::after {
+  animation-delay: 2.5s, 2.5s;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0.15;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+@keyframes glitchShift {
+  0%,
+  86%,
+  100% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  87% {
+    transform: translate(-6px, 2px);
+    opacity: 0.85;
+  }
+  89% {
+    transform: translate(5px, -2px);
+    opacity: 0.85;
+  }
+  91% {
+    transform: translate(-3px, 1px);
+    opacity: 0.85;
+  }
+  93% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes glitchShift2 {
+  0%,
+  88%,
+  100% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  89% {
+    transform: translate(6px, -2px);
+    opacity: 0.85;
+  }
+  91% {
+    transform: translate(-5px, 2px);
+    opacity: 0.85;
+  }
+  93% {
+    transform: translate(3px, -1px);
+    opacity: 0.85;
+  }
+  95% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes glitchSlice {
+  0%,
+  86%,
+  100% {
+    clip-path: inset(0 0 100% 0);
+  }
+  87% {
+    clip-path: inset(12% 0 60% 0);
+  }
+  89% {
+    clip-path: inset(55% 0 20% 0);
+  }
+  91% {
+    clip-path: inset(30% 0 45% 0);
+  }
+  93% {
+    clip-path: inset(0 0 100% 0);
+  }
+}
