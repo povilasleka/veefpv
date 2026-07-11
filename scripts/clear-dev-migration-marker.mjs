@@ -6,7 +6,12 @@
 // the sentinel is just bookkeeping (removing it doesn't touch real applied
 // migrations or any actual data), clearing it before `payload migrate` runs
 // keeps the build from ever getting stuck on it.
+import nextEnv from "@next/env";
 import { Client } from "pg";
+
+const { loadEnvConfig } = nextEnv;
+
+loadEnvConfig(process.cwd());
 
 const client = new Client({ connectionString: process.env.DATABASE_URL });
 await client.connect();
