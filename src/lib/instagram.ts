@@ -3,10 +3,7 @@ import type { PayloadRequest } from "payload";
 const RAPIDAPI_HOST = "instagram120.p.rapidapi.com";
 const INSTAGRAM_USERNAME = "vee_fpv";
 
-// Safety cap on how many pages (~12 reels each) a single sync will walk
-// through, in case the "stop at first already-seen reel" check below never
-// triggers (e.g. on the very first run against a large account).
-const MAX_PAGES = 40;
+const REEL_LIMIT = 10;
 
 interface InstagramMedia {
   code: string;
@@ -22,40 +19,57 @@ interface InstagramReelsResponse {
   };
 }
 
-async function fetchReelsPage(maxId: string): Promise<InstagramReelsResponse> {
+// The reels feed above doesn't include the caption — it has to be looked up
+// per-post via this separate endpoint, keyed by the reel's public URL.
+type InstagramLinksResponse = Array<{ meta?: { title?: string } }>;
+
+function fetchRapidApi<T>(path: string, body: unknown): Promise<T> {
   const apiKey = process.env.RAPIDAPI_KEY;
   if (!apiKey) {
     throw new Error("RAPIDAPI_KEY is not set");
   }
 
-  const res = await fetch(`https://${RAPIDAPI_HOST}/api/instagram/reels`, {
+  return fetch(`https://${RAPIDAPI_HOST}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "x-rapidapi-host": RAPIDAPI_HOST,
       "x-rapidapi-key": apiKey,
     },
-    body: JSON.stringify({ username: INSTAGRAM_USERNAME, maxId }),
+    body: JSON.stringify(body),
+  }).then(async (res) => {
+    if (!res.ok) {
+      throw new Error(`Instagram API request to ${path} failed: ${res.status} ${res.statusText}`);
+    }
+    return res.json();
   });
+}
 
-  if (!res.ok) {
-    throw new Error(`Instagram API request failed: ${res.status} ${res.statusText}`);
+function fetchReelsPage(maxId: string): Promise<InstagramReelsResponse> {
+  return fetchRapidApi("/api/instagram/reels", { username: INSTAGRAM_USERNAME, maxId });
+}
+
+async function fetchReelTitle(shortcode: string, req: PayloadRequest): Promise<string | undefined> {
+  try {
+    const data = await fetchRapidApi<InstagramLinksResponse>("/api/instagram/links", {
+      url: `https://www.instagram.com/reel/${shortcode}/`,
+    });
+    return data[0]?.meta?.title || undefined;
+  } catch (err) {
+    req.payload.logger.warn(`Failed to fetch title for reel ${shortcode}: ${err}`);
+    return undefined;
   }
-
-  return res.json();
 }
 
 export interface SyncInstagramReelsResult {
   created: number;
-  pagesScanned: number;
 }
 
 /**
- * Walks the Instagram reels feed newest-first, one page at a time, and
- * creates a "reels" doc for every shortcode we haven't seen before.
- * Stops as soon as it hits a shortcode already in the database — everything
- * older than that was covered by a previous sync — so a routine click only
- * costs as many API calls as there are genuinely new reels.
+ * Fetches Instagram's newest reels and creates a "reels" doc for every
+ * shortcode among the latest REEL_LIMIT that we haven't seen before.
+ * Anything older is ignored — the site never shows more than REEL_LIMIT
+ * reels anyway (see getReels()), so there's no reason to sync further back.
  */
 export async function syncInstagramReels(req: PayloadRequest): Promise<SyncInstagramReelsResult> {
   const { payload } = req;
@@ -67,48 +81,37 @@ export async function syncInstagramReels(req: PayloadRequest): Promise<SyncInsta
   });
   const knownShortcodes = new Set(existing.map((reel) => reel.shortcode));
 
+  const data = await fetchReelsPage("");
+  const edges = (data.result?.edges ?? []).slice(0, REEL_LIMIT);
+
   // New reels get a rank below (i.e. "newer than") every rank assigned so
-  // far, in the order encountered (page 1 first = newest). Basing it on the
-  // sync's start time keeps new ranks below every previous sync's ranks too,
+  // far, in the order encountered (newest first). Basing it on the sync's
+  // start time keeps new ranks below every previous sync's ranks too,
   // without having to read or renumber existing docs.
   const baseline = Date.now();
   let created = 0;
-  let cursor = "";
-  let page = 0;
-  let reachedKnown = false;
 
-  while (page < MAX_PAGES && !reachedKnown) {
-    const data = await fetchReelsPage(cursor);
-    const edges = data.result?.edges ?? [];
-    if (edges.length === 0) break;
+  for (const { node } of edges) {
+    const { code: shortcode, image_versions2 } = node.media;
 
-    for (const { node } of edges) {
-      const { code: shortcode, image_versions2 } = node.media;
-
-      if (knownShortcodes.has(shortcode)) {
-        reachedKnown = true;
-        break;
-      }
-
-      await payload.create({
-        collection: "reels",
-        req,
-        data: {
-          shortcode,
-          thumbnailUrl: image_versions2?.candidates?.[0]?.url,
-          rank: baseline - created,
-        },
-      });
-      knownShortcodes.add(shortcode);
-      created++;
+    if (knownShortcodes.has(shortcode)) {
+      continue;
     }
 
-    page++;
-    if (reachedKnown || !data.result?.page_info.has_next_page) break;
+    const title = await fetchReelTitle(shortcode, req);
 
-    cursor = data.result.page_info.end_cursor ?? "";
-    if (!cursor) break;
+    await payload.create({
+      collection: "reels",
+      req,
+      data: {
+        shortcode,
+        title,
+        thumbnailUrl: image_versions2?.candidates?.[0]?.url,
+        rank: baseline - created,
+      },
+    });
+    created++;
   }
 
-  return { created, pagesScanned: page };
+  return { created };
 }

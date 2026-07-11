@@ -246,7 +246,7 @@ export interface ContactSubmission {
   createdAt: string;
 }
 /**
- * Synced from Instagram via the "Sync reels" button below — not editable by hand.
+ * Synced from Instagram via the "Sync reels" button below. Only "Disabled" is editable by hand — everything else is managed by the sync.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "reels".
@@ -258,6 +258,10 @@ export interface Reel {
    */
   shortcode: string;
   /**
+   * The reel's Instagram caption, pulled in at sync time. Not all reels have one.
+   */
+  title?: string | null;
+  /**
    * Instagram CDN thumbnail. Refreshed on every sync — the URL expires after a while.
    */
   thumbnailUrl?: string | null;
@@ -265,6 +269,10 @@ export interface Reel {
    * Sort order (newest first). Assigned automatically during sync.
    */
   rank: number;
+  /**
+   * Hide this reel from the public site without deleting it.
+   */
+  disabled?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -445,8 +453,10 @@ export interface ContactSubmissionsSelect<T extends boolean = true> {
  */
 export interface ReelsSelect<T extends boolean = true> {
   shortcode?: T;
+  title?: T;
   thumbnailUrl?: T;
   rank?: T;
+  disabled?: T;
   updatedAt?: T;
   createdAt?: T;
 }

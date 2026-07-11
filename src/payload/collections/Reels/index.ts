@@ -14,8 +14,9 @@ export const Reels: CollectionConfig = {
   },
   admin: {
     useAsTitle: "shortcode",
-    defaultColumns: ["shortcode", "rank", "createdAt"],
-    description: 'Synced from Instagram via the "Sync reels" button below — not editable by hand.',
+    defaultColumns: ["shortcode", "thumbnailUrl", "title", "disabled", "rank", "createdAt"],
+    description:
+      'Synced from Instagram via the "Sync reels" button below. Only "Disabled" is editable by hand — everything else is managed by the sync.',
     components: {
       beforeListTable: ["/collections/Reels/SyncReelsButton#SyncReelsButton"],
     },
@@ -37,11 +38,22 @@ export const Reels: CollectionConfig = {
       },
     },
     {
+      name: "title",
+      type: "text",
+      admin: {
+        readOnly: true,
+        description: "The reel's Instagram caption, pulled in at sync time. Not all reels have one.",
+      },
+    },
+    {
       name: "thumbnailUrl",
       type: "text",
       admin: {
         readOnly: true,
         description: "Instagram CDN thumbnail. Refreshed on every sync — the URL expires after a while.",
+        components: {
+          Cell: "/collections/Reels/ThumbnailCell#ThumbnailCell",
+        },
       },
     },
     {
@@ -52,6 +64,14 @@ export const Reels: CollectionConfig = {
       admin: {
         readOnly: true,
         description: "Sort order (newest first). Assigned automatically during sync.",
+      },
+    },
+    {
+      name: "disabled",
+      type: "checkbox",
+      defaultValue: false,
+      admin: {
+        description: "Hide this reel from the public site without deleting it.",
       },
     },
   ],

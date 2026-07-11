@@ -52,6 +52,7 @@ export async function getReels(): Promise<Reel[]> {
   const payload = await getPayload({ config: configPromise });
   const { docs } = await payload.find({
     collection: "reels",
+    where: { disabled: { not_equals: true } },
     sort: "-rank",
     limit: 10,
   });
