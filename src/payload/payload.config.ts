@@ -38,6 +38,11 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || "",
     },
     migrationDir: path.resolve(dirname, "migrations"),
+    // Explicit rather than relying on Payload's implicit NODE_ENV-based default:
+    // push auto-syncs schema without migrations, which must never touch Neon.
+    // Any one-off script pointed at DATABASE_URL=<neon> MUST also set
+    // NODE_ENV=production, or this will still push against it.
+    push: process.env.NODE_ENV !== "production",
   }),
   sharp,
   plugins: [
