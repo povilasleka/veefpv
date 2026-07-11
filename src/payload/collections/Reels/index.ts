@@ -1,11 +1,16 @@
 import type { CollectionConfig } from "payload";
 import { syncInstagramReels } from "@/lib/instagram";
+import { revalidatePaths } from "../../hooks/revalidatePaths";
 
 export const Reels: CollectionConfig = {
   slug: "reels",
   labels: {
     singular: "Reel",
     plural: "Reels",
+  },
+  hooks: {
+    afterChange: [revalidatePaths(["/"])],
+    afterDelete: [revalidatePaths(["/"])],
   },
   admin: {
     useAsTitle: "shortcode",

@@ -1,10 +1,14 @@
 import type { GlobalConfig } from 'payload'
+import { revalidatePaths } from '../hooks/revalidatePaths'
 
 export const Hero: GlobalConfig = {
   slug: 'hero',
   label: 'Hero',
   access: {
     read: () => true,
+  },
+  hooks: {
+    afterChange: [revalidatePaths(['/'])],
   },
   fields: [
     {
